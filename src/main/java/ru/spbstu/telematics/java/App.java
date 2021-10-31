@@ -26,6 +26,7 @@ public class App
         mymap.remove(14);//Удаление элемента по ключу
         mymap.clearAll();//Удаление всех элементов
 
+        
         //Коллекция TreeMap
         TreeMap<Integer,String> surnames =new TreeMap<Integer,String>();
         surnames.put(12, "Regalinov");//Добавление в коллекцию
