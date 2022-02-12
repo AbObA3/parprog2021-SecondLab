@@ -3,7 +3,7 @@ import java.util.Objects;
 import java.util.Iterator;
 import java.lang.Iterable;
 
-public class treemap<K,V> implements Iterable<treemap.Node<K,V>> {
+public class TreeMap<K,V> implements Iterable<TreeMap.Node<K,V>> {
     @Override
     public Iterator<Node<K, V>> iterator() {
         return new MapIterator();

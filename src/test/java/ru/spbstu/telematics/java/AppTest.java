@@ -1,8 +1,8 @@
 package ru.spbstu.telematics.java;
 
-import junit.framework.Test;
+
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
+
 
 /**
  * Unit test for simple App.
@@ -10,29 +10,47 @@ import junit.framework.TestSuite;
 public class AppTest 
     extends TestCase
 {
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public AppTest( String testName )
+
+    public void testApp1()
     {
-        super( testName );
+        ru.spbstu.telematics.java.TreeMap<Integer, String> mymap = new ru.spbstu.telematics.java.TreeMap<Integer,String>();//Создание
+        mymap.put(12, "Regalinov");//Добавление в коллекцию
+        mymap.put(13,"Ivanov");
+        mymap.put(14, "Gerilin");
+        int size = mymap.size();//
+        java.util.TreeMap<Integer,String> surnames =new java.util.TreeMap<Integer,String>();
+        surnames.put(12, "Regalinov");//Добавление в коллекцию
+        surnames.put(13,"Ivanov");
+        surnames.put(14, "Gerilin");
+        int size1 = surnames.size();
+        assertEquals(size,size1);
+    }
+    public void testApp2()
+    {
+        ru.spbstu.telematics.java.TreeMap<Integer, String> mymap = new ru.spbstu.telematics.java.TreeMap<Integer,String>();//Создание
+        mymap.put(12, "Regalinov");//Добавление в коллекцию
+        mymap.put(13,"Ivanov");
+        mymap.put(14, "Gerilin");
+        boolean key = mymap.containsByKey(14);
+        java.util.TreeMap<Integer,String> surnames =new java.util.TreeMap<Integer,String>();
+        surnames.put(12, "Regalinov");//Добавление в коллекцию
+        surnames.put(13,"Ivanov");
+        surnames.put(14, "Gerilin");
+        boolean key1 = surnames.containsKey(14);
+        assertEquals(key,key1);
+    }
+    public void testApp3(){
+        ru.spbstu.telematics.java.TreeMap<Integer, String> mymap = new ru.spbstu.telematics.java.TreeMap<Integer,String>();//Создание
+        mymap.put(12, "Regalinov");//Добавление в коллекцию
+        mymap.put(13,"Ivanov");
+        mymap.put(14, "Gerilin");
+        boolean value = mymap.containsByValue("Regalinov");
+        java.util.TreeMap<Integer,String> surnames =new java.util.TreeMap<Integer,String>();
+        surnames.put(12, "Regalinov");//Добавление в коллекцию
+        surnames.put(13,"Ivanov");
+        surnames.put(14, "Gerilin");
+        boolean value1 = surnames.containsValue("Regalinov");
+        assertEquals(value,value1);
     }
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( AppTest.class );
-    }
-
-    /**
-     * Rigourous Test :-)
-     */
-    public void testApp()
-    {
-        assertTrue( true );
-    }
 }
