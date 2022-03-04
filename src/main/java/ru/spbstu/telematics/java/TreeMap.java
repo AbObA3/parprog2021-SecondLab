@@ -1,55 +1,71 @@
 package ru.spbstu.telematics.java;
-import java.util.Objects;
-import java.util.Iterator;
+import com.sun.source.tree.Tree;
+
+import java.util.*;
 import java.lang.Iterable;
 
 public class TreeMap<K,V> implements Iterable<TreeMap.Node<K,V>> {
     @Override
     public Iterator<Node<K, V>> iterator() {
-        return new MapIterator();
+        return new EntryIterator(this.getFirstNode());
+    }
+    public Iterator<V> iteratorByValue(){
+        return new ValueIterator(this.getFirstNode());
+    }
+    public Iterator<K> iteratorByKey(){
+        return new KeyIterator(this.getFirstNode());
     }
 
-    private Node<K,V> root;
+    private Node<K, V> root;
     private int size = 0;
     private int modCount = 0;
+
     public void clearAll() {
-        this.size=0;
+        this.size = 0;
         this.modCount++;
-        root=null;
+        root = null;
     }
+
     public void put(K key, V value) {
         Objects.requireNonNull(value);
         Objects.requireNonNull(key);
-        Node<K,V> t = root;
-        if(root==null) {
+        Node<K, V> t = root;
+        if (root == null) {
 
-            root = new Node<>(key,value,null);
-            size=1;
+            root = new Node<>(key, value, null);
+            size = 1;
             modCount++;
             return;
         }
         int cmp;
-        Node<K,V> pre ;
+        Node<K, V> pre;
 
         Comparable<? super K> k = (Comparable<? super K>) key;
         do {
             pre = t;
-            cmp=k.compareTo(t.m_key);
-            if(cmp<0) {
-                t=t.m_left;
+            cmp = k.compareTo(t.m_key);
+            if (cmp < 0) {
+                t = t.m_left;
+            } else if (cmp > 0) {
+                t = t.m_right;
+            } else {
+                t.m_value = value;
             }
-            else if (cmp>0) {
-                t=t.m_right;
-            }
-            else {
-                t.m_value=value;
-            }
-        } while(t!=null);
-        addToTree(key,value,pre,cmp<0);
+        } while (t != null);
+        addToTree(key, value, pre, cmp < 0);
     }
-    private void addToTree(K key,V value, Node<K,V> parent, boolean side) {
-        Node<K,V> n = new Node<>(key,value,parent);
-        if(side==false)
+    public V replace(K key, V value) {
+        TreeMap.Node<K,V> p = getNode(key);
+        if (p!=null) {
+            V oldValue = p.m_value;
+            p.m_value = value;
+            return oldValue;
+        }
+        return null;
+    }
+    private void addToTree(K key, V value, Node<K, V> parent, boolean side) {
+        Node<K, V> n = new Node<>(key, value, parent);
+        if (side == false)
             parent.m_right = n;
         else
             parent.m_left = n;
@@ -57,30 +73,31 @@ public class TreeMap<K,V> implements Iterable<TreeMap.Node<K,V>> {
         size++;
         modCount++;
     }
+
     public int size() {
         return this.size;
     }
+
     public boolean containsByKey(K key) {
         Objects.requireNonNull(key);
-        Comparable<? super  K> k= (Comparable<? super K>) key;
-        Node<K,V> n = root;
-        while(n!=null) {
+        Comparable<? super K> k = (Comparable<? super K>) key;
+        Node<K, V> n = root;
+        while (n != null) {
             int cmp = k.compareTo(n.m_key);
-            if(cmp<0) {
-                n=n.m_left;
-            }
-            else if(cmp>0) {
-                n= n.m_right;
-            }
-            else {
+            if (cmp < 0) {
+                n = n.m_left;
+            } else if (cmp > 0) {
+                n = n.m_right;
+            } else {
                 return true;
             }
         }
         return false;
     }
+
     public boolean containsByValue(V value) {
         Objects.requireNonNull(value);
-        for (Node<K,V> e = getFirstNode(); e != null; e = pre(e))
+        for (Node<K, V> e = getFirstNode(); e != null; e = pre(e))
             if (value.equals(e.m_value))
                 return true;
         return false;
@@ -88,36 +105,33 @@ public class TreeMap<K,V> implements Iterable<TreeMap.Node<K,V>> {
 
     public boolean remove(K key) {
         Objects.requireNonNull(key);
-        Node<K,V> n = root;
-        Comparable<? super K> k = (Comparable<? super K>)key;
-        while(n!= null) {
+        Node<K, V> n = root;
+        Comparable<? super K> k = (Comparable<? super K>) key;
+        while (n != null) {
             int cmp = k.compareTo(n.m_key);
-            if(cmp<0) {
+            if (cmp < 0) {
                 n = n.m_left;
-            }
-            else if(cmp>0) {
+            } else if (cmp > 0) {
                 n = n.m_right;
-            }
-            else {
+            } else {
                 deleteNode(n);
                 return true;
             }
         }
         return false;
     }
-    public Node<K,V> getNode(K key) {
+
+    public Node<K, V> getNode(K key) {
         Objects.requireNonNull(key);
-        Node<K,V> n = root;
-        Comparable<? super K> k = (Comparable<? super K>)key;
-        while(n!= null) {
+        Node<K, V> n = root;
+        Comparable<? super K> k = (Comparable<? super K>) key;
+        while (n != null) {
             int cmp = k.compareTo(n.m_key);
-            if(cmp<0) {
+            if (cmp < 0) {
                 n = n.m_left;
-            }
-            else if(cmp>0) {
+            } else if (cmp > 0) {
                 n = n.m_right;
-            }
-            else {
+            } else {
 
                 return n;
             }
@@ -125,27 +139,33 @@ public class TreeMap<K,V> implements Iterable<TreeMap.Node<K,V>> {
         return null;
     }
 
+    public V get(K key){
+        Node<K,V> p = getNode(key);
+        return (p!=null ? p.m_value : null);
+    }
 
     private static final boolean RED = true;
     private static final boolean BLACK = false;
 
-    static final class Node<K,V>  {
+    static final class Node<K, V> {
         K m_key;
         V m_value;
-        Node<K,V> m_left;
-        Node<K,V> m_right;
-        Node<K,V> m_parent;
+        Node<K, V> m_left;
+        Node<K, V> m_right;
+        Node<K, V> m_parent;
         boolean clr = BLACK;
 
 
-        Node(K key, V value, Node<K,V> parent) {
-            this.m_key=key;
-            this.m_value=value;
-            this.m_parent=parent;
+        Node(K key, V value, Node<K, V> parent) {
+            this.m_key = key;
+            this.m_value = value;
+            this.m_parent = parent;
         }
+
         public K getM_key() {
             return this.m_key;
         }
+
         public V getM_value() {
             return this.m_value;
         }
@@ -164,36 +184,51 @@ public class TreeMap<K,V> implements Iterable<TreeMap.Node<K,V>> {
                     '}';
         }
     }
-    final Node<K,V>  getFirstNode() {
-        Node<K,V> n= root;
-        if(n!= null) {
-            while (n.m_left!=null){
-                n=n.m_left;
-            }
-        }
-        return n;
-    }
-    final Node<K,V> getLastNode() {
-        Node<K,V> n= root;
-        if(n!= null) {
-            while (n.m_right!=null){
-                n=n.m_right;
-            }
-        }
-        return n;
-    }
-    private static <K,V> boolean colorOf(Node<K,V> n) { return (n==null ? BLACK: n.clr); }
-    private static <K,V> Node<K,V> parentOf(Node<K,V> n) {return (n==null ? null: n.m_parent);}
-    private static <K,V> void setColor(Node <K,V> n, boolean c) {
-        if (n != null)
-            n.clr=c;
-    }
-    private static <K,V> Node<K,V> leftOf(Node<K,V> n) {return (n==null ? null : n.m_left);}
-    private static <K,V> Node<K,V> rightOf(Node<K,V> n) {return (n==null ? null : n.m_right);}
 
-    private void rotateLeft(Node<K,V> n) {
+    final Node<K, V> getFirstNode() {
+        Node<K, V> n = root;
         if (n != null) {
-            Node<K,V> r = n.m_right;
+            while (n.m_left != null) {
+                n = n.m_left;
+            }
+        }
+        return n;
+    }
+
+    final Node<K, V> getLastNode() {
+        Node<K, V> n = root;
+        if (n != null) {
+            while (n.m_right != null) {
+                n = n.m_right;
+            }
+        }
+        return n;
+    }
+
+    private static <K, V> boolean colorOf(Node<K, V> n) {
+        return (n == null ? BLACK : n.clr);
+    }
+
+    private static <K, V> Node<K, V> parentOf(Node<K, V> n) {
+        return (n == null ? null : n.m_parent);
+    }
+
+    private static <K, V> void setColor(Node<K, V> n, boolean c) {
+        if (n != null)
+            n.clr = c;
+    }
+
+    private static <K, V> Node<K, V> leftOf(Node<K, V> n) {
+        return (n == null ? null : n.m_left);
+    }
+
+    private static <K, V> Node<K, V> rightOf(Node<K, V> n) {
+        return (n == null ? null : n.m_right);
+    }
+
+    private void rotateLeft(Node<K, V> n) {
+        if (n != null) {
+            Node<K, V> r = n.m_right;
             n.m_right = r.m_left;
             if (r.m_left != null)
                 r.m_left.m_parent = n;
@@ -208,9 +243,10 @@ public class TreeMap<K,V> implements Iterable<TreeMap.Node<K,V>> {
             n.m_parent = r;
         }
     }
-    private void rotateRight(Node<K,V> n) {
+
+    private void rotateRight(Node<K, V> n) {
         if (n != null) {
-            Node<K,V> l = n.m_left;
+            Node<K, V> l = n.m_left;
             n.m_left = l.m_right;
             if (l.m_right != null) l.m_right.m_parent = n;
             l.m_parent = n.m_parent;
@@ -223,12 +259,13 @@ public class TreeMap<K,V> implements Iterable<TreeMap.Node<K,V>> {
             n.m_parent = l;
         }
     }
-    private void fixAfterInsertion(Node<K,V> x) {
+
+    private void fixAfterInsertion(Node<K, V> x) {
         x.clr = RED;
 
         while (x != null && x != root && x.m_parent.clr == RED) {
             if (parentOf(x) == leftOf(parentOf(parentOf(x)))) {
-                Node<K,V> y = rightOf(parentOf(parentOf(x)));
+                Node<K, V> y = rightOf(parentOf(parentOf(x)));
                 if (colorOf(y) == RED) {
                     setColor(parentOf(x), BLACK);
                     setColor(y, BLACK);
@@ -244,7 +281,7 @@ public class TreeMap<K,V> implements Iterable<TreeMap.Node<K,V>> {
                     rotateRight(parentOf(parentOf(x)));
                 }
             } else {
-                Node<K,V> y = leftOf(parentOf(parentOf(x)));
+                Node<K, V> y = leftOf(parentOf(parentOf(x)));
                 if (colorOf(y) == RED) {
                     setColor(parentOf(x), BLACK);
                     setColor(y, BLACK);
@@ -263,19 +300,20 @@ public class TreeMap<K,V> implements Iterable<TreeMap.Node<K,V>> {
         }
         root.clr = BLACK;
     }
-    private void deleteNode(Node<K,V> p) {
+
+    private void deleteNode(Node<K, V> p) {
         modCount++;
         size--;
 
 
         if (p.m_left != null && p.m_right != null) {
-            Node<K,V> s = pre(p);
+            Node<K, V> s = pre(p);
             p.m_key = s.m_key;
             p.m_value = s.m_value;
             p = s;
         }
 
-        Node<K,V> replace = (p.m_left != null ? p.m_left : p.m_right);
+        Node<K, V> replace = (p.m_left != null ? p.m_left : p.m_right);
 
         if (replace != null) {
 
@@ -283,7 +321,7 @@ public class TreeMap<K,V> implements Iterable<TreeMap.Node<K,V>> {
             if (p.m_parent == null)
                 root = replace;
             else if (p == p.m_parent.m_left)
-                p.m_parent.m_left  = replace;
+                p.m_parent.m_left = replace;
             else
                 p.m_parent.m_right = replace;
 
@@ -308,17 +346,18 @@ public class TreeMap<K,V> implements Iterable<TreeMap.Node<K,V>> {
             }
         }
     }
-    static <K,V> Node<K,V> pre(Node<K,V> t) {
+
+    static <K, V> Node<K, V> pre(Node<K, V> t) {
         if (t == null)
             return null;
         else if (t.m_right != null) {
-            Node<K,V> p = t.m_right;
+            Node<K, V> p = t.m_right;
             while (p.m_left != null)
                 p = p.m_left;
             return p;
         } else {
-            Node<K,V> p = t.m_parent;
-            Node<K,V> ch = t;
+            Node<K, V> p = t.m_parent;
+            Node<K, V> ch = t;
             while (p != null && ch == p.m_right) {
                 ch = p;
                 p = p.m_parent;
@@ -326,10 +365,11 @@ public class TreeMap<K,V> implements Iterable<TreeMap.Node<K,V>> {
             return p;
         }
     }
-    private void fixAfterDeletion(Node<K,V> x) {
+
+    private void fixAfterDeletion(Node<K, V> x) {
         while (x != root && colorOf(x) == BLACK) {
             if (x == leftOf(parentOf(x))) {
-                Node<K,V> sib = rightOf(parentOf(x));
+                Node<K, V> sib = rightOf(parentOf(x));
 
                 if (colorOf(sib) == RED) {
                     setColor(sib, BLACK);
@@ -338,7 +378,7 @@ public class TreeMap<K,V> implements Iterable<TreeMap.Node<K,V>> {
                     sib = rightOf(parentOf(x));
                 }
 
-                if (colorOf(leftOf(sib))  == BLACK &&
+                if (colorOf(leftOf(sib)) == BLACK &&
                         colorOf(rightOf(sib)) == BLACK) {
                     setColor(sib, RED);
                     x = parentOf(x);
@@ -356,7 +396,7 @@ public class TreeMap<K,V> implements Iterable<TreeMap.Node<K,V>> {
                     x = root;
                 }
             } else {
-                Node<K,V> sib = leftOf(parentOf(x));
+                Node<K, V> sib = leftOf(parentOf(x));
 
                 if (colorOf(sib) == RED) {
                     setColor(sib, BLACK);
@@ -387,25 +427,54 @@ public class TreeMap<K,V> implements Iterable<TreeMap.Node<K,V>> {
 
         setColor(x, BLACK);
     }
-    public class MapIterator<T> implements Iterator<T> {
-        Node<K,V> it;
+
+    public abstract class MapIterator<T> implements Iterator<T> {
+        Node<K, V> next;
 
 
-        public MapIterator(){
-            it=getFirstNode();
-        }
-        @Override
-        public boolean hasNext() {
-            return (pre(it)==null) ? false : true;
+        MapIterator(Node<K, V> first) {
+            next = first;
         }
 
-        @Override
-        public T next() {
-            T node = (T)pre(it);
-            it=pre(it);
-            return node;
+
+        public Node<K, V> nextNode() {
+            Node<K,V> e = next;
+            if (e == null)
+                throw new NoSuchElementException();
+            next = pre(e);
+            return e;
+        }
+
+
+        public final boolean hasNext() {
+            return next != null;
+        }
+    }
+    final class EntryIterator extends MapIterator<TreeMap.Node<K,V>> {
+        EntryIterator(Node<K,V> first) {
+            super(first);
+        }
+        public TreeMap.Node<K,V> next() {
+            return nextNode();
+        }
+    }
+
+    final class ValueIterator extends MapIterator<V> {
+        ValueIterator(TreeMap.Node<K,V> first) {
+            super(first);
+        }
+        public V next() {
+            return nextNode().m_value;
+        }
+    }
+
+    final class KeyIterator extends MapIterator<K> {
+        KeyIterator(TreeMap.Node<K,V> first) {
+            super(first);
+        }
+        public K next() {
+            return nextNode().m_key;
         }
     }
 
 }
-

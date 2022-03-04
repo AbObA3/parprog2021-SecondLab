@@ -19,6 +19,8 @@ public class App
         Iterator<ru.spbstu.telematics.java.TreeMap.Node<Integer,String>> it = mymap.iterator();//Проверка интерфейса Iterable<T>
         boolean hn = it.hasNext();
         tmp=it.next();
+        Iterator<String> it1 = mymap.iteratorByValue();
+        Iterator<Integer> it2 = mymap.iteratorByKey();
         mymap.remove(14);//Удаление элемента по ключу
         mymap.clearAll();//Удаление всех элементов
 
@@ -28,6 +30,7 @@ public class App
         surnames.put(12, "Regalinov");//Добавление в коллекцию
         surnames.put(13,"Ivanov");
         surnames.put(14, "Gerilin");
+
         int size1 = surnames.size();
         boolean key1 = surnames.containsKey(14);//Проверка существования элемента в коллекции по ключу
         boolean value1 = surnames.containsValue("Regalinov");//Проверка существования элемента в коллекции по значению
